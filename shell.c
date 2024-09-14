@@ -5,6 +5,7 @@
  * all together makes me headache.
  */
 #include <errno.h>
+#include <stdbool.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
