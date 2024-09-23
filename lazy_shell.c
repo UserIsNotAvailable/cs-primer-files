@@ -28,6 +28,7 @@ volatile pid_t pgid = 0;
 void sigint_handler(int sig) {
     if (!pgid) exit(0);
     if (killpg(pgid, SIGINT) < 0) error(1);
+    pgid = 0;
 }
 
 void run(char prompt[MAX_PROMPT], const int infd) {
@@ -82,7 +83,6 @@ void run(char prompt[MAX_PROMPT], const int infd) {
 
             int status;
             waitpid(pid, &status, 0);
-            pgid = (pid == pgid) ? 0 : pgid;
     }
 }
 
