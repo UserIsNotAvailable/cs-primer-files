@@ -10,8 +10,8 @@ typedef struct blocking_queue {
     size_t capacity;
     size_t head;
     size_t tail;
-    pthread_mutex_t *mutex_head;
-    pthread_mutex_t *mutex_tail;
+    pthread_mutex_t mutex_head;
+    pthread_mutex_t mutex_tail;
     int sem_set_id;
 } blocking_queue;
 
@@ -20,21 +20,17 @@ void blocking_queue_init(blocking_queue *const bq, const size_t capacity) {
     bq->capacity = capacity;
     bq->head = 0;
     bq->tail = 0;
-    bq->mutex_head = malloc(sizeof(pthread_mutex_t));
-    bq->mutex_tail = malloc(sizeof(pthread_mutex_t));
     bq->sem_set_id = semget(IPC_PRIVATE, 2, IPC_CREAT | IPC_EXCL | 0600);
-    pthread_mutex_init(bq->mutex_head, NULL);
-    pthread_mutex_init(bq->mutex_tail, NULL);
+    pthread_mutex_init(&bq->mutex_head, NULL);
+    pthread_mutex_init(&bq->mutex_tail, NULL);
     semctl(bq->sem_set_id, 0, SETVAL, 0); // first sem set with initial value 0 for current elements
     semctl(bq->sem_set_id, 1, SETVAL, capacity); // second sem set with initial value capacity for current spaces
 }
 
-void blocking_queue_destroy(const blocking_queue *const bq) {
-    semctl(bq->sem_set_id, 0, IPC_RMID);// release system resource
-    pthread_mutex_destroy(bq->mutex_tail);
-    pthread_mutex_destroy(bq->mutex_head);
-    free(bq->mutex_tail);
-    free(bq->mutex_head);
+void blocking_queue_destroy(blocking_queue *const bq) {
+    semctl(bq->sem_set_id, 0, IPC_RMID); // release system resource
+    pthread_mutex_destroy(&bq->mutex_tail);
+    pthread_mutex_destroy(&bq->mutex_head);
     free(bq->buffer);
 }
 
@@ -45,11 +41,11 @@ void blocking_queue_put(blocking_queue *const bq, const void *const e) {
     sem_op.sem_flg = 0;
     semop(bq->sem_set_id, &sem_op, 1);
 
-    pthread_mutex_lock(bq->mutex_tail);
+    pthread_mutex_lock(&bq->mutex_tail);
     bq->buffer[bq->tail] = e;
     printf("%d %p -> [%lu]\n", gettid(), e, bq->tail);
     bq->tail = (bq->tail + 1) % bq->capacity;
-    pthread_mutex_unlock(bq->mutex_tail);
+    pthread_mutex_unlock(&bq->mutex_tail);
 
     sem_op.sem_num = 0; // first sem set for current elements
     sem_op.sem_op = 1; // it's value increases one
@@ -64,11 +60,11 @@ const void *blocking_queue_take(blocking_queue *const bq) {
     sem_op.sem_flg = 0;
     semop(bq->sem_set_id, &sem_op, 1);
 
-    pthread_mutex_lock(bq->mutex_head);
+    pthread_mutex_lock(&bq->mutex_head);
     const void *e = bq->buffer[bq->head];
     printf("%d     [%lu] -> %p\n", gettid(), bq->head, e);
     bq->head = (bq->head + 1) % bq->capacity;
-    pthread_mutex_unlock(bq->mutex_head);
+    pthread_mutex_unlock(&bq->mutex_head);
 
     sem_op.sem_num = 1;
     sem_op.sem_op = 1;
