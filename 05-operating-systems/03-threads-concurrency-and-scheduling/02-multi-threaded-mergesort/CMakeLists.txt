@@ -1,0 +1,1 @@
+add_executable(multi-sort cputime.c cputime.h mergesort.c)

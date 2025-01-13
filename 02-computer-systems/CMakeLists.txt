@@ -1,0 +1,5 @@
+add_subdirectory(01-bits-and-bytes)
+#add_subdirectory(02-introduction-to-c)
+#add_subdirectory(03-low‑level-programming)
+#add_subdirectory(04-cpu-microarchitecture-and-low‑level-performance)
+#add_subdirectory(05-the-memory-hierarchy)

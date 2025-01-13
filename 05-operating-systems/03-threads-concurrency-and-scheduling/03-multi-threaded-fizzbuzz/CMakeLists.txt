@@ -1,0 +1,1 @@
+add_executable(fizzbuzz fizzbuzz.c)

@@ -1,0 +1,6 @@
+add_subdirectory(01-hello-world)
+#add_subdirectory(02-bitcount)
+#add_subdirectory(03-fast-pangram)
+#add_subdirectory(04-dynamic-array)
+#add_subdirectory(05-varint-c-extension)
+#add_subdirectory(06-basic-hashmap)

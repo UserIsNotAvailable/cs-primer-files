@@ -1,0 +1,1 @@
+add_executable(shell_basic shell_basic.c)

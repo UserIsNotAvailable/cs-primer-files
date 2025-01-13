@@ -1,0 +1,1 @@
+add_executable(mmap-basic share.c)

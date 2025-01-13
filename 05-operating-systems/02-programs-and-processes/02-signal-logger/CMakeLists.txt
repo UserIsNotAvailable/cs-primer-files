@@ -1,0 +1,1 @@
+add_executable(siglog siglog.c)
